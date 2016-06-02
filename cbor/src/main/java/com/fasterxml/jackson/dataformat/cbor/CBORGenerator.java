@@ -405,6 +405,15 @@ public class CBORGenerator extends GeneratorBase {
         _writeString(value);
     }
 
+	
+    public final void writeFieldLong(long size) throws IOException {
+        if (_writeContext.writeFieldName(String.valueOf(size)) == JsonWriteContext.STATUS_EXPECT_VALUE) {
+            _reportError("Can not write a field name, expecting a value");
+        }
+        _writeNumberNoCheck(size);
+    }
+
+
     /*
      * /********************************************************** /* Overridden
      * methods, copying with tag-awareness
@@ -462,6 +471,7 @@ public class CBORGenerator extends GeneratorBase {
      * marker fits within type marker byte; otherwise we might as well just use
      * "indefinite" notation.
      */
+	 
     @Override
     public void writeStartArray(int size) throws IOException {
         _verifyValueWrite("start an array");
@@ -471,6 +481,62 @@ public class CBORGenerator extends GeneratorBase {
          * else { }
          */
         _writeByte(BYTE_ARRAY_INDEFINITE);
+    }
+
+	    public final void writeStartSizedArray(long size) throws IOException {
+        _verifyValueWrite("start an array");
+        _writeContext = _writeContext.createChildArrayContext();
+        
+         if ( size < 0) { _writeByte(BYTE_ARRAY_INDEFINITE); }
+         
+         else if (size >= 0  && size <= 23)  {	// 0x17 maximum elements.
+        	 byte sized_array = (byte) (BYTE_ARRAY_DEFINITE + size);
+        	 _writeByte(sized_array);
+        	 }
+         
+         else if (size > 23  && size <= Byte.MAX_VALUE)  { 
+        	 _writeByte(BYTE_ARRAY_UINT8_ELEMENTS);
+        	 byte byte_lsb = (byte)(size);
+        	 _writeByte(byte_lsb);
+        	 }
+         
+         else if (size > Byte.MAX_VALUE  && size <= Short.MAX_VALUE)  {
+        	 _writeByte(BYTE_ARRAY_UINT16_ELEMENTS);
+        	 byte byte_msb = (byte)((size >> 8) & 0xff) ;
+        	 byte byte_lsb = (byte)(size);
+        	 _writeByte(byte_msb); _writeByte(byte_lsb);
+        	  }
+         
+         else if (size > Short.MAX_VALUE  && size <= Integer.MAX_VALUE )  { 
+        	 _writeByte(BYTE_ARRAY_UINT32_ELEMENTS);
+        	 byte byte_msb = (byte)((size >> 24) & 0xff) ;
+        	 byte byte_msb1 = (byte)((size >> 16) & 0xff) ;
+        	 byte byte_msb2 = (byte)((size >> 8) & 0xff) ;
+        	 byte byte_lsb = (byte)(size);
+        	 _writeByte(byte_msb); _writeByte(byte_msb1); _writeByte(byte_msb2); _writeByte(byte_lsb);
+        	 }
+         
+         else if (size > Integer.MAX_VALUE  && size <= Long.MAX_VALUE)  { 
+        	 _writeByte(BYTE_ARRAY_UINT64_ELEMENTS);
+        	 byte byte_msb = (byte)((size >> 56) & 0xff) ;
+        	 byte byte_msb1 = (byte)((size >> 48) & 0xff) ;
+        	 byte byte_msb2 = (byte)((size >> 40) & 0xff) ;
+        	 byte byte_msb3 = (byte)((size >> 32) & 0xff) ;
+        	 byte byte_msb4 = (byte)((size >> 24) & 0xff) ;
+        	 byte byte_msb5 = (byte)((size >> 16) & 0xff) ;
+        	 byte byte_msb6 = (byte)((size >> 8) & 0xff) ;
+        	 byte byte_lsb = (byte)(size);
+        	 _writeByte(byte_msb); _writeByte(byte_msb1); _writeByte(byte_msb2); _writeByte(byte_msb3);
+        	 _writeByte(byte_msb4); _writeByte(byte_msb5); _writeByte(byte_msb6); _writeByte(byte_lsb);
+        	 }
+    }
+    // to NOT end sized array with BYTE BREAK
+    public final void writeEndSizedArray() throws IOException {
+        if (!_writeContext.inArray()) {
+            _reportError("Current context not an ARRAY but "
+                    + _writeContext.getTypeDesc());
+        }
+        _writeContext = _writeContext.getParent();
     }
 
     @Override
@@ -500,6 +566,65 @@ public class CBORGenerator extends GeneratorBase {
             ctxt.setCurrentValue(forValue);
         }
         _writeByte(BYTE_OBJECT_INDEFINITE);
+    }
+	
+    public final void writeStartObject(long size) throws IOException {
+        _verifyValueWrite("start an object");
+
+        JsonWriteContext ctxt = _writeContext.createChildObjectContext();
+        _writeContext = ctxt;
+
+        if ( size < 0) { _writeByte(BYTE_OBJECT_INDEFINITE); }
+
+        else if (size >= 0  && size <= 23)  {	// 0x17 maximum elements.
+            byte sized_object = (byte) (BYTE_OBJECT_DEFINITE + size);
+            _writeByte(sized_object);
+        }
+
+        else if (size > 23  && size <= Byte.MAX_VALUE)  {
+            _writeByte(BYTE_OBJECT_UINT8_ELEMENTS);
+            byte byte_lsb = (byte)(size);
+            _writeByte(byte_lsb);
+        }
+
+        else if (size > Byte.MAX_VALUE  && size <= Short.MAX_VALUE)  {
+            _writeByte(BYTE_OBJECT_UINT16_ELEMENTS);
+            byte byte_msb = (byte)((size >> 8) & 0xff) ;
+            byte byte_lsb = (byte)(size);
+            _writeByte(byte_msb); _writeByte(byte_lsb);
+        }
+
+        else if (size > Short.MAX_VALUE  && size <= Integer.MAX_VALUE )  {
+            _writeByte(BYTE_OBJECT_UINT32_ELEMENTS);
+            byte byte_msb = (byte)((size >> 24) & 0xff) ;
+            byte byte_msb1 = (byte)((size >> 16) & 0xff) ;
+            byte byte_msb2 = (byte)((size >> 8) & 0xff) ;
+            byte byte_lsb = (byte)(size);
+            _writeByte(byte_msb); _writeByte(byte_msb1); _writeByte(byte_msb2); _writeByte(byte_lsb);
+        }
+
+        else if (size > Integer.MAX_VALUE  && size <= Long.MAX_VALUE)  {
+            _writeByte(BYTE_OBJECT_UINT64_ELEMENTS);
+            byte byte_msb = (byte)((size >> 56) & 0xff) ;
+            byte byte_msb1 = (byte)((size >> 48) & 0xff) ;
+            byte byte_msb2 = (byte)((size >> 40) & 0xff) ;
+            byte byte_msb3 = (byte)((size >> 32) & 0xff) ;
+            byte byte_msb4 = (byte)((size >> 24) & 0xff) ;
+            byte byte_msb5 = (byte)((size >> 16) & 0xff) ;
+            byte byte_msb6 = (byte)((size >> 8) & 0xff) ;
+            byte byte_lsb = (byte)(size);
+            _writeByte(byte_msb); _writeByte(byte_msb1); _writeByte(byte_msb2); _writeByte(byte_msb3);
+            _writeByte(byte_msb4); _writeByte(byte_msb5); _writeByte(byte_msb6); _writeByte(byte_lsb);
+        }
+    }
+
+    // to NOT end sized object with BYTE BREAK
+    public final void writeEndSizedObject() throws IOException {
+        if (!_writeContext.inObject()) {
+            _reportError("Current context not an object but "
+                    + _writeContext.getTypeDesc());
+        }
+        _writeContext = _writeContext.getParent();
     }
 
     @Override

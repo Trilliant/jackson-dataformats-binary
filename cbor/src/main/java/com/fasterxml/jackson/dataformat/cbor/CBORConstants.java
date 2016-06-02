@@ -38,6 +38,10 @@ public final class CBORConstants
      */
     
     public final static int SUFFIX_INDEFINITE = 0x1F;
+    public final static int SUFFIX_UINT8_ELEMENTS = 0x18;
+    public final static int SUFFIX_UINT16_ELEMENTS = 0x19;
+    public final static int SUFFIX_UINT32_ELEMENTS = 0x1A;
+    public final static int SUFFIX_UINT64_ELEMENTS = 0x1B;
 
     public final static int MASK_MAJOR_TYPE = 0xE0;
 
@@ -60,10 +64,23 @@ public final class CBORConstants
      */
 
     public final static byte BYTE_ARRAY_INDEFINITE = (byte) (PREFIX_TYPE_ARRAY + SUFFIX_INDEFINITE);
-    public final static byte BYTE_OBJECT_INDEFINITE = (byte) (PREFIX_TYPE_OBJECT + SUFFIX_INDEFINITE);
-
+    public final static byte BYTE_ARRAY_DEFINITE = (byte) (PREFIX_TYPE_ARRAY);
     // 2-element array commonly used (for big float, f.ex.)
     public final static byte BYTE_ARRAY_2_ELEMENTS = (byte) (PREFIX_TYPE_ARRAY + 2);
+    
+    public final static byte BYTE_ARRAY_UINT8_ELEMENTS = (byte) (PREFIX_TYPE_ARRAY + SUFFIX_UINT8_ELEMENTS);
+    public final static byte BYTE_ARRAY_UINT16_ELEMENTS = (byte) (PREFIX_TYPE_ARRAY + SUFFIX_UINT16_ELEMENTS);
+    public final static byte BYTE_ARRAY_UINT32_ELEMENTS = (byte) (PREFIX_TYPE_ARRAY + SUFFIX_UINT32_ELEMENTS);
+    public final static byte BYTE_ARRAY_UINT64_ELEMENTS = (byte) (PREFIX_TYPE_ARRAY + SUFFIX_UINT64_ELEMENTS);
+
+    public final static byte BYTE_OBJECT_INDEFINITE = (byte) (PREFIX_TYPE_OBJECT + SUFFIX_INDEFINITE);
+    public final static byte BYTE_OBJECT_DEFINITE = (byte) (PREFIX_TYPE_OBJECT);
+
+    public final static byte BYTE_OBJECT_UINT8_ELEMENTS = (byte) (PREFIX_TYPE_OBJECT + SUFFIX_UINT8_ELEMENTS);
+    public final static byte BYTE_OBJECT_UINT16_ELEMENTS = (byte) (PREFIX_TYPE_OBJECT + SUFFIX_UINT16_ELEMENTS);
+    public final static byte BYTE_OBJECT_UINT32_ELEMENTS = (byte) (PREFIX_TYPE_OBJECT + SUFFIX_UINT32_ELEMENTS);
+    public final static byte BYTE_OBJECT_UINT64_ELEMENTS = (byte) (PREFIX_TYPE_OBJECT + SUFFIX_UINT64_ELEMENTS);
+
     
     public final static byte BYTE_FALSE = (byte) (PREFIX_TYPE_MISC + 20);
     public final static byte BYTE_TRUE = (byte) (PREFIX_TYPE_MISC + 21);
